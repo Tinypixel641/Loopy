@@ -1,7 +1,11 @@
 {
-  "description": "Easily create and customize modular activity blocks for enhanced project management, ideal for teams seeking flexible workflow solutions.",
+  "title": "Loopy, devis UX/UI en ligne",
+  "description": "Crée et module tes devis de design UX/UI facilement, ajoute et enlève les activités, modifie les TJM, puis exporte",
   "robots": {
     "index": false
+  },
+  "icons": {
+    "icon": "/.figma/make/favicon.png"
   },
   "accessibility": {
     "addBypassLinks": false,

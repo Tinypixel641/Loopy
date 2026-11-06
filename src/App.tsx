@@ -11,7 +11,7 @@ type Category =
 type Participant =
   | 'UX Designer' | 'UI Designer' | 'Product Designer' | 'Product Manager'
   | 'Developer' | 'Client' | 'End Users' | 'Stakeholders' | 'Marketing'
-  | 'Sales' | 'Customer Success' | 'Data / Analytics' | 'Management';
+  | 'Sales' | 'Data / Analytics' | 'Management';
 
 type Status = 'Draft' | 'Sent' | 'Accepted' | 'Rejected';
 type MobileTab = 'library' | 'builder' | 'summary';
@@ -164,7 +164,7 @@ const LIBRARY: LibItem[] = [
     risk: "La pensée en silos manque les frictions inter-canaux et les moments où la fidélité des utilisateurs se gagne ou se perd.",
     deliverables: ["Artefact de parcours utilisateur", "Carte de chaleur des opportunités", "Outputs du Workshop"],
     defaultTJM: 750, defaultDays: 2,
-    participants: ['UX Designer', 'Product Manager', 'Client', 'Customer Success'],
+    participants: ['UX Designer', 'Product Manager', 'Client'],
   },
   {
     id: 'u3', title: "Architecture de l'Information", category: 'UX',
@@ -346,7 +346,6 @@ const PART_COLOR: Record<Participant, string> = {
   'Stakeholders':     '#64748b',
   'Marketing':        '#f59e0b',
   'Sales':            '#ef4444',
-  'Customer Success': '#84cc16',
   'Data / Analytics': '#14b8a6',
   'Management':       '#6b7280',
 };
@@ -354,7 +353,7 @@ const PART_COLOR: Record<Participant, string> = {
 const ALL_PARTICIPANTS: Participant[] = [
   'UX Designer', 'UI Designer', 'Product Designer', 'Product Manager',
   'Developer', 'Client', 'End Users', 'Stakeholders', 'Marketing',
-  'Sales', 'Customer Success', 'Data / Analytics', 'Management',
+  'Sales', 'Data / Analytics', 'Management',
 ];
 
 const STATUS_STYLE: Record<Status, string> = {
@@ -375,6 +374,9 @@ function fmt(n: number) {
 }
 
 function initials(p: Participant) {
+  if (p === 'UX Designer') return 'UX';
+  if (p === 'UI Designer') return 'UI';
+  if (p === 'End Users') return 'U';
   return p.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 }
 
@@ -871,7 +873,12 @@ function SummaryPanel({ items, globalTJM, onGlobalTJMChange }: {
         <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4">
           <p className="text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-3">Participants</p>
           <div className="flex flex-wrap gap-2">
-            {allParticipants.map(p => <Avatar key={p} p={p} size={30} />)}
+            {allParticipants.map(p => (
+              <div key={p} className="inline-flex items-center gap-2 min-w-0 rounded-full bg-[var(--surface2)] pr-3">
+                <Avatar p={p} size={30} />
+                <span className="text-[11px] font-medium text-[var(--text)] whitespace-nowrap">{p}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -926,6 +933,77 @@ function TJMModal({ current, pending, onApplyAll, onApplyNew, onCancel }: {
 // EN-TÊTE
 // ═══════════════════════════════════════════════════════════════════════════════
 
+function InfoModal({ onClose }: { onClose: () => void }) {
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-60 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="info-modal-title">
+      <button className="absolute inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-sm" onClick={onClose} aria-label="Fermer la fenêtre d'information" />
+      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl">
+        <div className="flex items-start justify-between gap-4 border-b border-[var(--border)] px-6 py-5">
+          <div>
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">À propos de l'outil</p>
+            <h2 id="info-modal-title" className="text-xl font-semibold text-[var(--text)]">Le périmètre de Loopy</h2>
+          </div>
+          <button onClick={onClose} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-lg text-[var(--muted)] transition-colors hover:bg-[var(--surface2)] hover:text-[var(--text)]" aria-label="Fermer">
+            ×
+          </button>
+        </div>
+
+        <div className="space-y-5 px-6 py-5">
+          <p className="text-[13px] leading-relaxed text-[var(--muted)]">
+            Loopy aide les designers UX/UI et Product à composer un scope de projet, à estimer la charge de travail et à construire une première enveloppe budgétaire.
+          </p>
+
+          <div className="rounded-xl border border-[var(--accent)]/20 bg-[var(--accent-soft)] p-4">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--accent)]">Ce que vous pouvez faire</p>
+            <ul className="space-y-2">
+              {[
+                "Sélectionner et organiser des activités depuis la bibliothèque.",
+                "Ajuster les jours, le TJM, les participants et les livrables.",
+                "Distinguer les activités incluses des options non comptabilisées.",
+                "Obtenir une estimation instantanée du budget et de la durée.",
+              ].map(item => (
+                <li key={item} className="flex items-start gap-2 text-[12px] leading-relaxed text-[var(--text)]">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">À garder en tête</p>
+            <p className="text-[12px] leading-relaxed text-[var(--muted)]">
+              Le résultat est une estimation indicative destinée au cadrage et à la discussion. Il ne remplace pas un devis contractuel et n'inclut pas automatiquement les coûts externes, les taxes, les aléas ou les prestations absentes du scope.
+            </p>
+          </div>
+
+          <div className="rounded-xl bg-[var(--surface2)] px-4 py-3 text-[12px] leading-relaxed text-[var(--muted)]">
+            Une suggestion pour améliorer Loopy ? Écrivez à{' '}
+            <a href="mailto:anais.lopez641@gmail.com" className="font-medium text-[var(--accent)] underline decoration-[var(--accent)]/30 underline-offset-2 hover:decoration-[var(--accent)]">
+              anais.lopez641@gmail.com
+            </a>
+          </div>
+        </div>
+
+        <div className="flex justify-end border-t border-[var(--border)] bg-[var(--surface2)]/50 px-6 py-4">
+          <button onClick={onClose} className="rounded-lg bg-[var(--accent)] px-4 py-2 text-[12px] font-semibold text-white transition-opacity hover:opacity-90">
+            J'ai compris
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Header({ projectName, clientName, status, dark, saved, onProjectName, onClientName, onStatus, onToggleDark, onExport }: {
   projectName: string; clientName: string; status: Status; dark: boolean; saved: boolean;
   onProjectName: (v: string) => void; onClientName: (v: string) => void;
@@ -934,8 +1012,10 @@ function Header({ projectName, clientName, status, dark, saved, onProjectName, o
   const [editingProject, setEditingProject] = useState(false);
   const [editingClient, setEditingClient] = useState(false);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
   return (
+    <>
     <header className="h-14 shrink-0 border-b border-[var(--border)] bg-[var(--surface)] flex items-center px-4 gap-4 relative z-30">
       {/* Logo */}
       <div className="flex items-center gap-2 shrink-0">
@@ -995,6 +1075,16 @@ function Header({ projectName, clientName, status, dark, saved, onProjectName, o
         {saved ? '✓ Enregistré' : 'Non enregistré'}
       </span>
 
+      {/* Informations sur l'outil */}
+      <button onClick={() => setShowInfo(true)} title="À propos de Loopy" aria-label="Afficher les informations sur Loopy"
+        className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--muted)] hover:bg-[var(--surface2)] hover:text-[var(--accent)] transition-colors">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 11v5" />
+          <path d="M12 8h.01" />
+        </svg>
+      </button>
+
       {/* Mode sombre */}
       <button onClick={onToggleDark} title={dark ? 'Mode clair' : 'Mode sombre'}
         className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--muted)] hover:bg-[var(--surface2)] hover:text-[var(--text)] transition-colors text-base">
@@ -1006,6 +1096,8 @@ function Header({ projectName, clientName, status, dark, saved, onProjectName, o
         Exporter
       </button>
     </header>
+    {showInfo && <InfoModal onClose={() => setShowInfo(false)} />}
+    </>
   );
 }
 
